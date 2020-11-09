@@ -23,9 +23,9 @@ def simple_evaluator(board):
             return 9999
     if board.is_stalemate():
         if board.turn:
-            return 0
-        else:
             return -9999
+        else:
+            return 0
     if board.is_insufficient_material():
         return 0
 

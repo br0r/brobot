@@ -4,7 +4,7 @@ from brobot.engine import search, evaluators
 import numpy as np
 
 class Engine:
-    def __init__(self, evaluator, fen=False, name="", color=True, depth=3, totaltime=None):
+    def __init__(self, evaluator, fen=False, name="", color=True, depth=1, totaltime=None):
         self.name = name
         self.color = color
         if fen:
