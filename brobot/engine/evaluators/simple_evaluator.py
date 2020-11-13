@@ -2,19 +2,6 @@ import chess
 import numpy as np
 from .piece_tables import pawntable, knightstable, bishopstable, rookstable, queenstable, kingstable
 
-def stupid_evaluator(board):
-    if board.is_checkmate():
-        if board.turn:
-            return -9999
-        else:
-            return 9999
-    if board.is_stalemate():
-        return 0
-    if board.is_insufficient_material():
-        return 0
-
-    return 1
-
 def simple_evaluator(board):
     if board.is_checkmate():
         if board.turn:
@@ -22,10 +9,7 @@ def simple_evaluator(board):
         else:
             return 9999
     if board.is_stalemate():
-        if board.turn:
-            return -9999
-        else:
-            return 0
+        return 0
     if board.is_insufficient_material():
         return 0
 
@@ -72,3 +56,4 @@ def simple_evaluator(board):
         return eval
 
     return -eval
+

@@ -4,8 +4,9 @@ from brobot.engine import Engine, evaluators
 
 def main():
     fen = None
-    engine2 = Engine(evaluators.stupid_evaluator, name="stupid", fen=fen)
+    engine2 = Engine(evaluators.net_evaluator, name="net", depth=2, fen=fen)
     engine = Engine(evaluators.simple_evaluator, name="simple", depth=3, fen=fen)
+    #engine = Engine(evaluators.stupid_evaluator, name="stupid", fen=fen)
 
     engine.color= chess.WHITE
     engine2.color = chess.BLACK
