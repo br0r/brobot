@@ -5,6 +5,7 @@ import chess.pgn
 import chess.engine
 import json
 import csv
+from utils import eprint
 
 if len(sys.argv) < 4:
     print('Invalid arguments (pgn, stockfish, n)')
@@ -21,13 +22,31 @@ if not stockfish_path:
     print('No stockfish path')
     sys.exit(1)
 
-count = 0
 engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 writer = csv.writer(sys.stdout)
 with open(pgn_file, 'r') as pgn:
-    for i in range(int(n)):
+    count = 0
+    while count < int(n):
         game = chess.pgn.read_game(pgn)
+        if not game:
+            eprint('Consumed')
+            break
         board = chess.Board()
+        try:
+            headers = game.headers
+            belo = headers.get('BlackElo', 0)
+            belo = 0 if belo == '?' else int(belo)
+            welo = int(headers.get('WhiteElo', 0))
+            welo = 0 if welo == '?' else int(welo)
+            elo = (belo + welo) / 2
+            opening = headers.get('Opening')
+        except:
+            eprint('skip')
+            continue
+
+        if elo < 1500:
+            continue
+
         for move in game.mainline_moves():
             board.push(move)
             ev = engine.analyse(board, chess.engine.Limit(depth=0))
@@ -37,7 +56,9 @@ with open(pgn_file, 'r') as pgn:
                 y = 9999
             else:
                 y = float(str(score))
+
             writer.writerow([fen, y])
 
+        count += 1
 pgn.close()
 engine.close()
