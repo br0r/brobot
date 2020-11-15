@@ -5,7 +5,9 @@ import chess.pgn
 import chess.engine
 import json
 import csv
+import random
 from utils import eprint
+
 
 if len(sys.argv) < 4:
     print('Invalid arguments (pgn, stockfish, n)')
@@ -24,6 +26,7 @@ if not stockfish_path:
 
 engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 writer = csv.writer(sys.stdout)
+max_rand_moves = 1
 with open(pgn_file, 'r') as pgn:
     count = 0
     while count < int(n):
@@ -44,20 +47,34 @@ with open(pgn_file, 'r') as pgn:
             eprint('skip')
             continue
 
-        if elo < 1500:
+        if elo < 2000:
             continue
 
         for move in game.mainline_moves():
             board.push(move)
+            rand_moves = 0
+            num_rand_moves = max_rand_moves
+            for i in range(num_rand_moves):
+                legal_moves = list(board.legal_moves)
+                rand_move = None
+                if len(legal_moves):
+                    rand_move = random.choice(list(board.legal_moves))
+                    board.push(rand_move)
+                    rand_moves += 1
             ev = engine.analyse(board, chess.engine.Limit(depth=0))
             fen = board.fen()
             score = ev['score'].white()
+            y = None
             if isinstance(score, chess.engine.Mate) or isinstance(score, chess.engine.MateGivenType):
-                y = 9999
+                y = None # Ignore mates
             else:
                 y = float(str(score))
 
-            writer.writerow([fen, y])
+            for i in range(rand_moves):
+                board.pop() # Undo random
+
+            if y is not None:
+                writer.writerow([fen, y])
 
         count += 1
 pgn.close()

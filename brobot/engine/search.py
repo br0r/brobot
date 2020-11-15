@@ -30,7 +30,7 @@ def iterative_deepening(board, depth, maximizingPlayer, evaluator, timelimit=Non
     np.random.shuffle(legal_moves)
     start = time.time()
 
-    for d in range(0, depth if not timelimit else 100):
+    for d in range(depth - 1, depth if not timelimit else 100):
         dbest = (-999999, None)
         moves = sort_moves(board, legal_moves, transition_table)
         alpha = -99999
@@ -39,6 +39,7 @@ def iterative_deepening(board, depth, maximizingPlayer, evaluator, timelimit=Non
             board.push(move)
 
             score = alphabeta(board, d, maximizingPlayer, evaluator, transition_table, alpha, beta)
+            #print(score, move)
 
             if score > dbest[0]:
                 dbest = (score, move)

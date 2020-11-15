@@ -14,12 +14,10 @@ def get_pieces(pieces, num):
             x.append([0, 0, 0])
             continue
         index = pieces[i]
-        nfile = chess.square_file(index) / 7
-        nrank = chess.square_rank(index) / 7
+        nfile = (chess.square_file(index) - 3.5) / 3.5
+        nrank = (chess.square_rank(index) - 3.5) / 3.5
         x.append([1, nfile, nrank])
     return x
-
-
 
 pieces = ['p','n','b','r','q','k','P','N','B','R','Q','K']
 piecesm = {}
@@ -40,7 +38,7 @@ def get_train_row_old(board):
             label = -1
         if ind > 5 and board.turn: #white piece, white to move
             label = 1
-        if ind > 5 and not board.turn: #black piece, black to move
+        if ind > 5 and not board.turn: #white piece, black to move
             label = -1
 
         rep[key][ind] = label
@@ -58,15 +56,15 @@ def get_train_row(board):
 
     material = [
         len(board.pieces(chess.QUEEN, chess.WHITE)),
-        len(board.pieces(chess.ROOK, chess.WHITE)),
-        len(board.pieces(chess.BISHOP, chess.WHITE)),
-        len(board.pieces(chess.KNIGHT, chess.WHITE)),
-        len(board.pieces(chess.PAWN, chess.WHITE)),
+        len(board.pieces(chess.ROOK, chess.WHITE)) / 2,
+        len(board.pieces(chess.BISHOP, chess.WHITE)) / 2,
+        len(board.pieces(chess.KNIGHT, chess.WHITE)) / 2,
+        len(board.pieces(chess.PAWN, chess.WHITE)) / 8,
         len(board.pieces(chess.QUEEN, chess.BLACK)),
-        len(board.pieces(chess.ROOK, chess.BLACK)),
-        len(board.pieces(chess.BISHOP, chess.BLACK)),
-        len(board.pieces(chess.KNIGHT, chess.BLACK)),
-        len(board.pieces(chess.PAWN, chess.BLACK))
+        len(board.pieces(chess.ROOK, chess.BLACK)) / 2,
+        len(board.pieces(chess.BISHOP, chess.BLACK)) / 2,
+        len(board.pieces(chess.KNIGHT, chess.BLACK)) / 2,
+        len(board.pieces(chess.PAWN, chess.BLACK)) / 8
     ]
 
     pieces = [
