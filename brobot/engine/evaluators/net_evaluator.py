@@ -7,12 +7,12 @@ from brobot.train.utils import get_train_row, get_train_row_old
 gmodel = None
 WEIGHTS_PATH = '/tmp/checkpoint'
 cache = {}
+# negamax impl
 def net_evaluator(board):
+    turn = board.turn
+    mul = 1 if turn else -1
     if board.is_checkmate():
-        if board.turn:
-            return -9999
-        else:
-            return 9999
+        return -mul * 9999
 
     if board.is_stalemate():
         return 0
@@ -24,13 +24,12 @@ def net_evaluator(board):
         gmodel = tf.keras.models.load_model(WEIGHTS_PATH)
     h = zobrist_hash(board)
     if h in cache:
-        if board.turn:
-            return cache[h]
-        else:
-            return -cache[h]
+        # return mul * cache[h]
+        return cache[h]
 
     gf, pf, sf = get_train_row(board)
     score = gmodel.predict([np.array([gf]), np.array([pf]), np.array([sf])])[0]
+    #score = gmodel.predict([np.array([gf]), np.array([pf])])[0]
 
     #x = get_train_row_old(board)
     #score = gmodel.predict(np.array([x]))[0]
@@ -38,7 +37,5 @@ def net_evaluator(board):
     #gf, pf = get_train_row(board)
     #score = gmodel.predict(np.array([pf]))[0]
     cache[h] = score
-    if board.turn:
-        return score
-    else:
-        return -score
+    #return mul * score
+    return score

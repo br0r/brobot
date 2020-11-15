@@ -1,6 +1,7 @@
 import time
 import chess
 from brobot.engine import Engine, evaluators
+import random
 
 def main():
     fen = None
@@ -19,6 +20,14 @@ def main():
 
     movehistory = []
     while engine.board.is_game_over() == False:
+        if len(movehistory) < 6:
+            move = random.choice(list(engine.board.legal_moves))
+            engine.make_move(move)
+            engine2.make_move(move)
+            movehistory.append(move)
+            print(move)
+            turn = turn * -1
+            continue
         t = time.time()
         if turn == 1:
             score, move = engine.find_best_move()
@@ -35,7 +44,6 @@ def main():
         print(move, dt)
 
         turn = turn * -1
-
     print("Done, result", engine.board.result())
     game.add_line(movehistory)
     print(game)

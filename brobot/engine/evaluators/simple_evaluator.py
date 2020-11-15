@@ -3,11 +3,10 @@ import numpy as np
 from .piece_tables import pawntable, knightstable, bishopstable, rookstable, queenstable, kingstable
 
 def simple_evaluator(board):
+    turn = board.turn
+    mul = 1 if turn else -1
     if board.is_checkmate():
-        if board.turn:
-            return -9999
-        else:
-            return 9999
+        return -mul * 9999
     if board.is_stalemate():
         return 0
     if board.is_insufficient_material():
@@ -52,8 +51,6 @@ def simple_evaluator(board):
 
     eval = material + pawnsq + knightsq + bishopsq+ rooksq+ queensq + kingsq + check
 
-    if board.turn:
-        return eval
-
-    return -eval
+    #return mul * eval
+    return eval
 

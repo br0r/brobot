@@ -12,13 +12,14 @@ values = {
     chess.KNIGHT: 330,
     chess.ROOK: 500,
     chess.QUEEN: 900,
-    chess.KING: 0,
 }
 
 def get_lowest(board, arr):
-    if not arr:
+    pieces_ = [board.piece_type_at(x) for x in arr]
+    pieces_ = [x for x in pieces_ if x != chess.KING]
+    if not pieces_:
         return 0.0
-    return min([values[board.piece_type_at(x)] for x in arr]) / 900.
+    return min([values[piece] for piece in pieces_]) / 900.
 
 def get_pieces(board, pieces, num):
     x = []
@@ -111,5 +112,6 @@ def get_train_row(board):
     general_features = [board.turn, *castling, *material]
     piece_features = np.array(pieces).flatten().astype('float32')
     square_features = [*attack_map, *defend_map]
+    #square_features = None
 
     return [general_features, piece_features, square_features]

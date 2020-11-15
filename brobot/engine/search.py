@@ -40,6 +40,7 @@ def iterative_deepening(board, depth, maximizingPlayer, evaluator, timelimit=Non
 
             score = alphabeta(board, d, maximizingPlayer, evaluator, transition_table, alpha, beta)
 
+            print(move, score)
             if score > dbest[0]:
                 dbest = (score, move)
 
@@ -74,7 +75,7 @@ def iterative_deepening(board, depth, maximizingPlayer, evaluator, timelimit=Non
 def alphabeta(board, depth, maximizingPlayer, evaluator, transition_table=None, alpha=-999999, beta=999999):
     moves = list(board.legal_moves)
     if depth == 0:
-        v = evaluator(board)
+        v = quiesce(board, evaluator, maximizingPlayer, alpha, beta)
         if maximizingPlayer:
             return v
         else:
@@ -118,3 +119,38 @@ def alphabeta(board, depth, maximizingPlayer, evaluator, transition_table=None, 
         transition_table[hash_key] = entry
 
     return value
+
+def negamax(board, depth, evaluator, alpha, beta, color):
+    if depth == 0:
+        return [quiesce(board, evaluator, alpha, beta, color), None]
+    _max = [-99999, None]
+    moves = board.legal_moves
+    for move in moves:
+        board.push(move)
+        score = -negamax(board, depth - 1, evaluator, -beta, -alpha, -color)[0]
+        board.pop()
+        if score > _max[0]:
+            _max = [score, move]
+        alpha = max(alpha, _max[0])
+        if alpha >= beta:
+            break
+    return _max
+
+def quiesce(board, evaluator, alpha, beta, color):
+    standpat = color * evaluator(board)
+    if standpat >= beta:
+        return beta
+    if alpha < standpat:
+        alpha = standpat
+    
+    for child in board.legal_moves:
+        if not board.is_capture(child):
+            continue
+        board.push(child)
+        score = -quiesce(board, evaluator, -beta, -alpha, -color)
+        board.pop()
+        if score >= beta:
+            return beta
+        if score > alpha:
+            alpha = score
+    return alpha

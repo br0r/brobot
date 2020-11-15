@@ -21,6 +21,9 @@ class Engine:
 
     def find_best_move(self):
         turn = self.board.turn
+        color = 1 if turn else -1
+        return search.negamax(self.board, self.depth, self.evaluator, -9999, 9999, color)
+
         timelimit = self.calculate_timelimit()
         return search.iterative_deepening(self.board, self.depth, self.color != turn, self.evaluator, timelimit, self.transition_table)
 
