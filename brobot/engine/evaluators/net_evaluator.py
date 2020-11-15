@@ -24,7 +24,10 @@ def net_evaluator(board):
         gmodel = tf.keras.models.load_model(WEIGHTS_PATH)
     h = zobrist_hash(board)
     if h in cache:
-        return cache[h]
+        if board.turn:
+            return cache[h]
+        else:
+            return -cache[h]
 
     #gf, pf = get_train_row(board)
     #score = gmodel.predict([np.array([gf]), np.array([pf])])[0]
@@ -35,4 +38,7 @@ def net_evaluator(board):
     #gf, pf = get_train_row(board)
     #score = gmodel.predict(np.array([pf]))[0]
     cache[h] = score
-    return score
+    if board.turn:
+        return score
+    else:
+        return -score
