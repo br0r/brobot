@@ -6,18 +6,41 @@ import chess
 def eprint(*args, **kwargs):
     print(*args, file=sys.stderr, **kwargs)
 
-def get_pieces(pieces, num):
+values = {
+    chess.PAWN: 100,
+    chess.BISHOP: 320,
+    chess.KNIGHT: 330,
+    chess.ROOK: 500,
+    chess.QUEEN: 900,
+    chess.KING: 0,
+}
+
+def get_lowest(board, arr):
+    if not arr:
+        return 0.0
+    return min([values[board.piece_type_at(x)] for x in arr]) / 900.
+
+def get_pieces(board, pieces, num):
     x = []
     pieces = list(pieces)
     for i in range(num):
         if len(pieces) - 1 < i:
-            x.append([0, 0, 0])
+            x.append([0, 0, 0, 0, 0])
             continue
         index = pieces[i]
         nfile = (chess.square_file(index) - 3.5) / 3.5
         nrank = (chess.square_rank(index) - 3.5) / 3.5
-        x.append([1, nfile, nrank])
+        lowest_attacker = get_lowest(board, board.attackers(not board.color_at(index), index))
+        lowest_defender = get_lowest(board, board.attackers(board.color_at(index), index))
+        x.append([1, nfile, nrank, lowest_attacker, lowest_defender])
     return x
+
+def get_attack_map(board, color):
+    map_ = np.zeros((64,))
+    for i in range(64):
+        lowest_attacker = get_lowest(board, board.attackers(color, i))
+        map_[i] = lowest_attacker
+    return map_
 
 pieces = ['p','n','b','r','q','k','P','N','B','R','Q','K']
 piecesm = {}
@@ -68,21 +91,25 @@ def get_train_row(board):
     ]
 
     pieces = [
-        *get_pieces(board.pieces(chess.KING, chess.WHITE), 1),
-        *get_pieces(board.pieces(chess.QUEEN, chess.WHITE), 1),
-        *get_pieces(board.pieces(chess.ROOK, chess.WHITE), 2),
-        *get_pieces(board.pieces(chess.BISHOP, chess.WHITE), 2),
-        *get_pieces(board.pieces(chess.KNIGHT, chess.WHITE), 2),
-        *get_pieces(board.pieces(chess.PAWN, chess.WHITE), 8),
-        *get_pieces(board.pieces(chess.KING, chess.BLACK), 1),
-        *get_pieces(board.pieces(chess.QUEEN, chess.BLACK), 1),
-        *get_pieces(board.pieces(chess.ROOK, chess.BLACK), 2),
-        *get_pieces(board.pieces(chess.BISHOP, chess.BLACK), 2),
-        *get_pieces(board.pieces(chess.KNIGHT, chess.BLACK), 2),
-        *get_pieces(board.pieces(chess.PAWN, chess.BLACK), 8),
+        *get_pieces(board, board.pieces(chess.KING, chess.WHITE), 1),
+        *get_pieces(board, board.pieces(chess.QUEEN, chess.WHITE), 1),
+        *get_pieces(board, board.pieces(chess.ROOK, chess.WHITE), 2),
+        *get_pieces(board, board.pieces(chess.BISHOP, chess.WHITE), 2),
+        *get_pieces(board, board.pieces(chess.KNIGHT, chess.WHITE), 2),
+        *get_pieces(board, board.pieces(chess.PAWN, chess.WHITE), 8),
+        *get_pieces(board, board.pieces(chess.KING, chess.BLACK), 1),
+        *get_pieces(board, board.pieces(chess.QUEEN, chess.BLACK), 1),
+        *get_pieces(board, board.pieces(chess.ROOK, chess.BLACK), 2),
+        *get_pieces(board, board.pieces(chess.BISHOP, chess.BLACK), 2),
+        *get_pieces(board, board.pieces(chess.KNIGHT, chess.BLACK), 2),
+        *get_pieces(board, board.pieces(chess.PAWN, chess.BLACK), 8),
     ]
+
+    attack_map = get_attack_map(board, not board.turn)
+    defend_map = get_attack_map(board, board.turn)
 
     general_features = [board.turn, *castling, *material]
     piece_features = np.array(pieces).flatten().astype('float32')
+    square_features = [*attack_map, *defend_map]
 
-    return [general_features, piece_features]
+    return [general_features, piece_features, square_features]

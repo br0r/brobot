@@ -24,6 +24,8 @@ if not stockfish_path:
     print('No stockfish path')
     sys.exit(1)
 
+STOCKFISH_DEPTH = 6
+
 engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 writer = csv.writer(sys.stdout)
 max_rand_moves = 1
@@ -61,7 +63,7 @@ with open(pgn_file, 'r') as pgn:
                     rand_move = random.choice(list(board.legal_moves))
                     board.push(rand_move)
                     rand_moves += 1
-            ev = engine.analyse(board, chess.engine.Limit(depth=0))
+            ev = engine.analyse(board, chess.engine.Limit(depth=STOCKFISH_DEPTH))
             fen = board.fen()
             score = ev['score'].white()
             y = None

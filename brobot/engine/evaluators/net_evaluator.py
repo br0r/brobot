@@ -29,11 +29,11 @@ def net_evaluator(board):
         else:
             return -cache[h]
 
-    #gf, pf = get_train_row(board)
-    #score = gmodel.predict([np.array([gf]), np.array([pf])])[0]
+    gf, pf, sf = get_train_row(board)
+    score = gmodel.predict([np.array([gf]), np.array([pf]), np.array([sf])])[0]
 
-    x = get_train_row_old(board)
-    score = gmodel.predict(np.array([x]))[0]
+    #x = get_train_row_old(board)
+    #score = gmodel.predict(np.array([x]))[0]
 
     #gf, pf = get_train_row(board)
     #score = gmodel.predict(np.array([pf]))[0]

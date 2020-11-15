@@ -39,7 +39,6 @@ def iterative_deepening(board, depth, maximizingPlayer, evaluator, timelimit=Non
             board.push(move)
 
             score = alphabeta(board, d, maximizingPlayer, evaluator, transition_table, alpha, beta)
-            #print(score, move)
 
             if score > dbest[0]:
                 dbest = (score, move)
