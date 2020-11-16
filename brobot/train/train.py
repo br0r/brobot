@@ -9,7 +9,7 @@ import pickle
 
 def get_model():
     l = tf.keras.layers
-    general = l.Input(shape=(15,))
+    general = l.Input(shape=(16,))
     piece = l.Input(shape=(32 * 5))
     square = l.Input(shape=(64*2))
     #kr = tf.keras.regularizers.l1(0.01)
@@ -43,21 +43,34 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 
-def gen():
-    X = []
-    X2 = []
-    X3 = []
-    y = []
-    with open(sys.argv[1], 'r') as csv_file:
-        reader = csv.reader(csv_file)
-        for row in reader:
-            (fen, score) = row
-            print(fen)
-            if abs(float(score)) > 2000:
-                continue
-            a, b, c = get_train_row(chess.Board(fen))
+def create_dataset(csv_file_path, BATCH_SIZE):
+    def gen():
+        X = []
+        X2 = []
+        X3 = []
+        Y = []
+        with open(csv_file_path, 'r') as csv_file:
+            reader = csv.reader(csv_file)
+            for row in reader:
+                (fen, score) = row
+                y = float(score)
+                #if abs(y) > 2000:
+                    #continue
+                a, b, c = get_train_row(chess.Board(fen))
 
-            yield {'a': a, 'b': b, 'c': c}, float(score) / 2000
+                #y = y/2000
+                X.append(a)
+                X2.append(b)
+                X3.append(c)
+                Y.append(y)
+                if len(Y) > BATCH_SIZE:
+                    yield {'a': np.array(X).astype(np.float32), 'b': np.array(X2).astype(np.float32), 'c': np.array(X3).astype(np.float32)}, np.array(Y).astype(np.float32)
+                    X = []
+                    X2 = []
+                    X3 = []
+                    Y = []
+    dataset = tf.data.Dataset.from_generator(gen, output_types=({'a': tf.float64, 'b': tf.float64, 'c': tf.float64}, tf.float64))
+    return dataset
 
 model = get_model()
 optimizer = tf.keras.optimizers.Adam()
@@ -77,9 +90,12 @@ model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
     save_best_only=True
 )
 
-dataset = tf.data.Dataset.from_generator(gen, output_types=({'a': tf.float64, 'b': tf.float64, 'c': tf.float64}, tf.float64))
+
+
+#dataset = tf.data.Dataset.from_generator(gen, output_shapes=((tf.TensorShape((15,)), tf.SparseTensorSpec((32*5,))), tf.TensorSpec((64*2)), tf.TensorSpec(())))
+
 
 #xtrain = X2_train
 #xtest = X2_test
 
-model.fit(dataset, epochs=100, batch_size=128, validation_freq=1, callbacks=[early_stopping, model_checkpoint_callback])
+model.fit(create_dataset(sys.argv[1], 128), validation_data=create_dataset(sys.argv[2], 128), epochs=100,validation_freq=1, callbacks=[early_stopping, model_checkpoint_callback])

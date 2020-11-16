@@ -5,7 +5,7 @@ import random
 
 def main():
     fen = None
-    engine = Engine(evaluators.net_evaluator, name="net", depth=1, fen=fen)
+    engine = Engine(evaluators.net_evaluator, name="net", depth=2, fen=fen)
     engine2 = Engine(evaluators.simple_evaluator, name="simple", depth=2, fen=fen)
     #engine = Engine(evaluators.simple_evaluator, name="simple", depth=3, fen=fen)
     #engine2 = Engine(evaluators.stupid_evaluator, name="stupid", depth=1, fen=fen)
@@ -20,7 +20,7 @@ def main():
 
     movehistory = []
     while engine.board.is_game_over() == False:
-        if len(movehistory) < 6:
+        if len(movehistory) < 4:
             move = random.choice(list(engine.board.legal_moves))
             engine.make_move(move)
             engine2.make_move(move)

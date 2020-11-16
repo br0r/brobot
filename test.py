@@ -13,8 +13,12 @@ fen = '1rbq1bnr/ppp2Qp1/n2kp3/3pNP2/3P4/N7/PPP2PPP/R1B1KB1R w KQ - 1 9'
 fen = 'r1bqkbnr/ppp3p1/n3p3/3pNP1Q/8/N7/PPPP1PPP/R1B1KB1R b KQkq - 0 6'
 # Queen take, white to move - bxa3
 fen = 'rnb1kbnr/ppp2ppp/4p3/3p4/3P4/q4N2/PPP1PPPP/R1BQKBR1 w Qkq - 0 5'; 
+# Mate in one, white to move - d4f6
+fen = '7k/p1R5/1p2Bn1p/5K2/P2B4/8/1P4PP/8 w - - 0 43' # waits until must make move
+fen = '7k/3R4/4Bn2/p4K2/p2B4/8/1P4pP/8 w - - 0 51' # must make move
+#
 
-engine = Engine(evaluators.net_evaluator, fen=fen, color=chess.WHITE, depth=1)
+engine = Engine(evaluators.net_evaluator, fen=fen, color=chess.WHITE, depth=2)
 engine.color = engine.board.turn
 
 print(engine.board.turn)
