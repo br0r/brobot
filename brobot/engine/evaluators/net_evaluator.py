@@ -12,7 +12,7 @@ def net_evaluator(board):
     turn = board.turn
     mul = 1 if turn else -1
     if board.is_checkmate():
-        return -mul * 9999
+        return -mul * (9000 - len(board.move_stack))
 
     if board.is_stalemate():
         return 0

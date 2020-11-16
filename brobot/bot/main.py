@@ -28,7 +28,8 @@ def start():
                 client.bots.decline_challenge(challenge['id'])
         elif event['type'] == 'gameStart':
             gameEvent = event['game']
-            engine = Engine(evaluators.simple_evaluator)
+            #engine = Engine(evaluators.simple_evaluator)
+            engine = Engine(evaluators.net_evaluator, depth=1)
             game = Game(client, gameEvent['id'], engine, bot_id)
             games[gameEvent['id']] = game
             game.start()
@@ -40,3 +41,4 @@ def start():
                 game = games[game_id]
                 game.join()
                 del games[game_id]
+            client.challenges.create('jrti_bot', False, clock_limit=60*5, increment=0)

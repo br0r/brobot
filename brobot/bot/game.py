@@ -2,6 +2,7 @@ import threading
 import chess
 import datetime
 import time
+import random
 
 class Game(threading.Thread):
     def __init__(self, client, game_id, engine, bot_id, **kwargs):
@@ -52,8 +53,12 @@ class Game(threading.Thread):
             self.engine.make_move(uci_move)
 
     def make_move(self):
-        score, move = self.engine.find_best_move()
-        print('MAKE_MOVE', move)
-        time.sleep(0.2)
+        if len(self.engine.board.move_stack) < 4:
+            move = random.choice(list(self.engine.board.legal_moves))
+        else:
+            t = time.time()
+            score, move = self.engine.find_best_move()
+            print('MAKE_MOVE', move, time.time() - t)
+            #time.sleep(0.2)
         self.client.bots.make_move(self.game_id, move)
 

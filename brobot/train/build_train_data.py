@@ -64,7 +64,6 @@ with open(pgn_file, 'r') as pgn:
                     board.push(rand_move)
                     rand_moves += 1
             ev = engine.analyse(board, chess.engine.Limit(depth=STOCKFISH_DEPTH))
-            fen = board.fen()
             score = ev['score'].white()
             y = None
             if isinstance(score, chess.engine.Mate) or isinstance(score, chess.engine.MateGivenType):
@@ -72,11 +71,28 @@ with open(pgn_file, 'r') as pgn:
             else:
                 y = float(str(score))
 
-            for i in range(rand_moves):
-                board.pop() # Undo random
 
             if y is not None:
+                fen = board.fen()
                 writer.writerow([fen, y])
+
+            for i in range(rand_moves):
+                board.pop() # Undo random
+        if not board.is_game_over():
+            while not board.is_game_over():
+                ev = engine.analyse(board, chess.engine.Limit(depth=STOCKFISH_DEPTH))
+                move = ev['pv'][0]
+                score = ev['score'].white()
+                y = None
+                if isinstance(score, chess.engine.Mate) or isinstance(score, chess.engine.MateGivenType):
+                    y = None # Ignore mates
+                else:
+                    y = float(str(score))
+                if y is not None:
+                    fen = board.fen()
+                    writer.writerow([fen, y])
+
+                board.push(move)
 
         count += 1
 pgn.close()

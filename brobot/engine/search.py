@@ -136,8 +136,10 @@ def negamax(board, depth, evaluator, alpha, beta, color):
             break
     return _max
 
-def quiesce(board, evaluator, alpha, beta, color):
+def quiesce(board, evaluator, alpha, beta, color, depth=100):
     standpat = color * evaluator(board)
+    if depth == 0:
+        return standpat
     if standpat >= beta:
         return beta
     if alpha < standpat:
@@ -147,7 +149,7 @@ def quiesce(board, evaluator, alpha, beta, color):
         if not board.is_capture(child):
             continue
         board.push(child)
-        score = -quiesce(board, evaluator, -beta, -alpha, -color)
+        score = -quiesce(board, evaluator, -beta, -alpha, -color, depth - 1)
         board.pop()
         if score >= beta:
             return beta

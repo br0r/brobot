@@ -109,6 +109,7 @@ def get_train_row(board):
     attack_map = get_attack_map(board, not board.turn)
     defend_map = get_attack_map(board, board.turn)
 
+    # ADD check
     general_features = [board.turn, *castling, *material]
     piece_features = np.array(pieces).flatten().astype('float32')
     square_features = [*attack_map, *defend_map]

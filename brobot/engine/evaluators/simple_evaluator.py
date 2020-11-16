@@ -6,7 +6,7 @@ def simple_evaluator(board):
     turn = board.turn
     mul = 1 if turn else -1
     if board.is_checkmate():
-        return -mul * 9999
+        return -mul * (9999 - len(list(board.move_stack)))
     if board.is_stalemate():
         return 0
     if board.is_insufficient_material():
