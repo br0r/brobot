@@ -41,4 +41,4 @@ def start():
                 game = games[game_id]
                 game.join()
                 del games[game_id]
-            client.challenges.create('jrti_bot', False, clock_limit=60*5, increment=0)
+            #client.challenges.create('jrti_bot', False, clock_limit=60*5, clock_increment=0)
