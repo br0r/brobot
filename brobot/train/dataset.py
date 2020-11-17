@@ -27,9 +27,8 @@ def serialize(a, b, c, y):
     proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return proto.SerializeToString()
 
-def createRecord(csv_file_path):
+def createRecord(csv_file_path, filename):
     #pool = Pool(1)
-    filename = './test.tfrec'
     i = 0
     with tf.io.TFRecordWriter(filename) as writer:
         with open(csv_file_path, 'r') as csv_file:

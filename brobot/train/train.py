@@ -113,4 +113,4 @@ def run():
     
     #fsns_test_file = tf.keras.utils.get_file('./test.tfrec', '.')
     #dataset = dataset.shuffle(buffer_size=100).batch(128)
-    model.fit(create_dataset(['./test.tfrec'], 128), epochs=100,validation_freq=1, callbacks=[early_stopping, model_checkpoint_callback])
+    model.fit(create_dataset(['./train.tfrec'], 128), validation_data=create_dataset(['./val.tfrec'], 128), epochs=100,validation_freq=1, callbacks=[early_stopping, model_checkpoint_callback])
