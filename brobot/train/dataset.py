@@ -1,3 +1,4 @@
+import sys
 from functools import partial
 import csv
 import numpy as np
@@ -32,7 +33,7 @@ def parse_tuner(parsef, engine, depth=4):
         return x, y
     return parser
 
-def build_serialized_data(csv_file, to, parsef):
+def build_serialized_data(csv_file, to, parsef, verbose=False):
     if not csv_file or not to:
         raise 'Invalid arguments'
     open(to, 'w').close()
@@ -49,9 +50,9 @@ def build_serialized_data(csv_file, to, parsef):
                 #np.savetxt(writef, arr, fmt='%d')
                 np.save(writef, arr)
                 i += 1
-                if i % 100000 == 0:
-                    print(i)
-
+                if i % 100 == 0 and verbose:
+                    sys.stdout.write('\r%d' % i)
+                    sys.stdout.flush()
 
 class SerializedSequence(tf.keras.utils.Sequence):
     def __init__(self, sequence_file_path, batch_size, mem=False):
