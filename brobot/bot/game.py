@@ -53,12 +53,12 @@ class Game(threading.Thread):
             self.engine.make_move(uci_move)
 
     def make_move(self):
-        if len(self.engine.board.move_stack) < 4:
+        if len(self.engine.board.move_stack) < 2:
             move = random.choice(list(self.engine.board.legal_moves))
         else:
             t = time.time()
             score, move = self.engine.find_best_move()
-            print('MAKE_MOVE', move, time.time() - t)
+            print('MAKE_MOVE', move, score, time.time() - t)
             #time.sleep(0.2)
         self.client.bots.make_move(self.game_id, move)
 

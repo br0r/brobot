@@ -15,6 +15,7 @@ class Engine:
         self.depth = depth
         self.timeleft = totaltime
         self.transition_table = {}
+        self.transition_table = {}
 
     def set_timeleft(self, timeleft):
         self.timeleft = timeleft
@@ -22,10 +23,8 @@ class Engine:
     def find_best_move(self):
         turn = self.board.turn
         color = 1 if turn else -1
-        return search.negamax(self.board, self.depth, self.evaluator, -9999, 9999, color)
-
-        timelimit = self.calculate_timelimit()
-        return search.iterative_deepening(self.board, self.depth, self.color != turn, self.evaluator, timelimit, self.transition_table)
+        (score, move) = search.negamax(self, self.depth, -9999, 9999, color)
+        return (score, move)
 
     def make_move(self, move):
         self.board.push(move)

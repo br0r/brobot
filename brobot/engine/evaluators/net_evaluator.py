@@ -5,7 +5,8 @@ from chess.polyglot import zobrist_hash
 from brobot.train.utils import get_train_row, get_train_row_old
 
 gmodel = None
-WEIGHTS_PATH = '/tmp/checkpoint'
+#WEIGHTS_PATH = '/tmp/checkpoint'
+WEIGHTS_PATH = '/Users/bror/workspace/workshops/checkpoint'
 cache = {}
 # negamax impl
 def net_evaluator(board):
@@ -28,7 +29,9 @@ def net_evaluator(board):
         return cache[h]
 
     gf, pf, sf = get_train_row(board)
-    score = gmodel.predict([np.array([gf]), np.array([pf]), np.array([sf])])[0]
+    score = gmodel([np.array([gf]), np.array([pf]), np.array([sf])])
+    score = float(score)
+    #score = gmodel.predict([np.array([gf]), np.array([pf]), np.array([sf])])[0]
     #score = gmodel.predict([np.array([gf]), np.array([pf])])[0]
 
     #x = get_train_row_old(board)
