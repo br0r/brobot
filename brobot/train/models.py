@@ -9,7 +9,8 @@ def get_old_model():
         l.Dense(2048, activation='elu'),
         l.BatchNormalization(),
         l.Dense(2048, activation='elu'),
-        #l.Dropout(0.5),
+        l.BatchNormalization(),
+        l.Dropout(0.5),
         l.Dense(1, activation='linear'),
     ])
     return model
