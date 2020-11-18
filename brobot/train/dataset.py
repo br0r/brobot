@@ -55,12 +55,13 @@ def build_serialized_data(csv_file, to, parsef, verbose=False):
                     sys.stdout.flush()
 
 class SerializedSequence(tf.keras.utils.Sequence):
-    def __init__(self, sequence_file_path, batch_size, mem=False):
+    def __init__(self, sequence_file_path, batch_size, mem=False, multi=False):
         self.batch_size = batch_size
         self.sequence_file_path = sequence_file_path
         i = 0
         self.chunks = []
         self.file = open(self.sequence_file_path, 'rb')
+        self.multi = multi
         self.mem = mem
         self.data = []
 
@@ -103,4 +104,9 @@ class SerializedSequence(tf.keras.utils.Sequence):
                 except:
                     break
         x,y = zip(*batch)
-        return np.array(x), np.array(y) / 100
+        if self.multi:
+            xs = [np.array(a) for a in zip(*x)]
+            ys = [np.array(y) / 100]
+            return xs, ys
+        else:
+            return np.array(x), np.array(y) / 100

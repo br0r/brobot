@@ -17,9 +17,9 @@ def get_old_model():
 
 def get_model():
     l = tf.keras.layers
-    general = l.Input(shape=(16,), name='a')
-    piece = l.Input(shape=(32 * 5), name='b')
-    square = l.Input(shape=(64*2), name='c')
+    general = l.Input(shape=(21,), name='a')
+    piece = l.Input(shape=(32 * 7), name='b')
+    square = l.Input(shape=(64*4), name='c')
     #kr = tf.keras.regularizers.l1(0.01)
     kr = None
 
