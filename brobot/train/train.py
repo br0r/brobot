@@ -8,11 +8,11 @@ from sklearn.model_selection import train_test_split
 
 def run(train_seq, val_seq=None, model=None):
     optimizer = tf.keras.optimizers.Adam()
-    model.compile(optimizer=optimizer, loss='mse', metrics=['mse', 'mae'])
+    model.compile(optimizer=optimizer, loss='mae', metrics=['mse', 'mae'])
     print(model.summary())
     checkpoint_filepath = '/tmp/checkpoint'
     early_stopping = tf.keras.callbacks.EarlyStopping(
-        monitor='val_loss', min_delta=0, patience=5, verbose=0, mode='auto',
+        monitor='val_loss', min_delta=0, patience=10, verbose=0, mode='auto',
         baseline=None, restore_best_weights=False
     )
 

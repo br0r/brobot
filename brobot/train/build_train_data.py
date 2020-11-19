@@ -24,7 +24,7 @@ if not stockfish_path:
     print('No stockfish path')
     sys.exit(1)
 
-STOCKFISH_DEPTH = 6
+STOCKFISH_DEPTH = 0
 
 engine = chess.engine.SimpleEngine.popen_uci(stockfish_path)
 writer = csv.writer(sys.stdout)

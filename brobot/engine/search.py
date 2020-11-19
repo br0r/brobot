@@ -19,6 +19,8 @@ def get_move_sort_score(board, move, color):
         score += 3000
     if board.is_attacked_by(not color, move.from_square):
         score += 1000
+    if board.is_castling(move):
+        score += 500
     return score
 
 def negamax(engine, depth, alpha, beta, color):
@@ -52,7 +54,7 @@ def negamax(engine, depth, alpha, beta, color):
         board.push(move)
         score = -negamax(engine, depth - 1, -beta, -alpha, -color)[0]
         board.pop()
-        if score >= _max[0]:
+        if score > _max[0]:
             _max = [score, move]
         alpha = max(alpha, _max[0])
         if alpha >= beta:

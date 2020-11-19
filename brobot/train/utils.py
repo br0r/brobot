@@ -47,6 +47,40 @@ def get_attack_map(board, color):
         map_[i] = [lowest_attacker, highest_attacker]
     return map_
 
+def get_mobility(board, pieces, num):
+    x = []
+    pieces = list(pieces)
+    for i in range(num):
+        if len(pieces) - 1 < i:
+            x.append([0, 0, 0, 0])
+            continue
+        mir = 8
+        mar = 0
+        mif = 8
+        maf = 0
+        index = pieces[i]
+        ora = chess.square_rank(index)
+        ofa = chess.square_file(index)
+        for attack in board.attacks(index):
+            sr = chess.square_rank(attack)
+            sf = chess.square_file(attack)
+            if sr < mir:
+                mir = sr
+            if sr > mar:
+                mar = sr
+            if sf < mif:
+                mif = sf
+            if sf > maf:
+                maf = sf
+        
+        x.append([
+                (mir - ora) / 7., 
+                (mar - ora) / 7., 
+                (mif - ofa) / 7., 
+                (maf - ofa) / 7.
+        ])
+    return x
+
 pieces = ['p','n','b','r','q','k','P','N','B','R','Q','K']
 piecesm = {}
 for i in range(len(pieces)):
@@ -82,17 +116,28 @@ def get_train_row(board):
         int(board.has_queenside_castling_rights(chess.BLACK)),
     ]
 
+    wq = board.pieces(chess.QUEEN, chess.WHITE)
+    wr = board.pieces(chess.ROOK, chess.WHITE)
+    wb = board.pieces(chess.BISHOP, chess.WHITE)
+    wn = board.pieces(chess.KNIGHT, chess.WHITE)
+    wp = board.pieces(chess.PAWN, chess.WHITE)
+    bq = board.pieces(chess.QUEEN, chess.BLACK)
+    br = board.pieces(chess.ROOK, chess.BLACK)
+    bb = board.pieces(chess.BISHOP, chess.BLACK)
+    bn = board.pieces(chess.KNIGHT, chess.BLACK)
+    bp = board.pieces(chess.PAWN, chess.BLACK)
+
     material = [
-        len(board.pieces(chess.QUEEN, chess.WHITE)),
-        len(board.pieces(chess.ROOK, chess.WHITE)),
-        len(board.pieces(chess.BISHOP, chess.WHITE)),
-        len(board.pieces(chess.KNIGHT, chess.WHITE)),
-        len(board.pieces(chess.PAWN, chess.WHITE)),
-        len(board.pieces(chess.QUEEN, chess.BLACK)),
-        len(board.pieces(chess.ROOK, chess.BLACK)),
-        len(board.pieces(chess.BISHOP, chess.BLACK)),
-        len(board.pieces(chess.KNIGHT, chess.BLACK)),
-        len(board.pieces(chess.PAWN, chess.BLACK))
+        len(wq),
+        len(wr),
+        len(wb),
+        len(wn),
+        len(wp),
+        len(bq),
+        len(br),
+        len(bb),
+        len(bn),
+        len(bp),
     ]
 
     m = material
@@ -110,16 +155,25 @@ def get_train_row(board):
     pieces = [
         *get_pieces(board, board.pieces(chess.KING, chess.WHITE), 1),
         *get_pieces(board, board.pieces(chess.KING, chess.BLACK), 1),
-        *get_pieces(board, board.pieces(chess.QUEEN, chess.WHITE), 1),
-        *get_pieces(board, board.pieces(chess.QUEEN, chess.BLACK), 1),
-        *get_pieces(board, board.pieces(chess.KNIGHT, chess.WHITE), 2),
-        *get_pieces(board, board.pieces(chess.KNIGHT, chess.BLACK), 2),
-        *get_pieces(board, board.pieces(chess.BISHOP, chess.WHITE), 2),
-        *get_pieces(board, board.pieces(chess.BISHOP, chess.BLACK), 2),
-        *get_pieces(board, board.pieces(chess.ROOK, chess.WHITE), 2),
-        *get_pieces(board, board.pieces(chess.ROOK, chess.BLACK), 2),
-        *get_pieces(board, board.pieces(chess.PAWN, chess.WHITE), 8),
-        *get_pieces(board, board.pieces(chess.PAWN, chess.BLACK), 8),
+        *get_pieces(board, wq, 1),
+        *get_pieces(board, bq, 1),
+        *get_pieces(board, wn, 2),
+        *get_pieces(board, bn, 2),
+        *get_pieces(board, wb, 2),
+        *get_pieces(board, bb, 2),
+        *get_pieces(board, wr, 2),
+        *get_pieces(board, br, 2),
+        *get_pieces(board, wp, 8),
+        *get_pieces(board, bp, 8),
+    ]
+
+    mobility = [
+        *get_mobility(board, wq, 1),
+        *get_mobility(board, bq, 1),
+        *get_mobility(board, wr, 2),
+        *get_mobility(board, br, 2),
+        *get_mobility(board, wb, 2),
+        *get_mobility(board, bb, 2)
     ]
 
     attack_map = get_attack_map(board, not board.turn)
@@ -127,6 +181,7 @@ def get_train_row(board):
 
     general_features = np.array([board.turn, board.is_check(), *castling, *material, *material_diff]).flatten().astype('float32')
     piece_features = np.array(pieces).flatten().astype('float32')
+    mobility_features = np.array(mobility).flatten().astype('float32')
     square_features = np.array([*attack_map, *defend_map]).flatten().astype('float32')
 
-    return [general_features, piece_features, square_features]
+    return [general_features, piece_features, mobility_features, square_features]

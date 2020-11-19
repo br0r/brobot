@@ -42,7 +42,7 @@ def main():
         dt = time.time() - t
 
         movehistory.append(move)
-        print(move, dt)
+        print(move, score, dt)
 
         turn = turn * -1
     print("Done, result", engine.board.result())

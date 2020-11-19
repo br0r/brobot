@@ -19,24 +19,33 @@ def get_model():
     l = tf.keras.layers
     general = l.Input(shape=(21,), name='a')
     piece = l.Input(shape=(32 * 7), name='b')
+    mobility = l.Input(shape=(4 * 10), name='mobility')
     square = l.Input(shape=(64*4), name='c')
     #kr = tf.keras.regularizers.l1(0.01)
     kr = None
 
-    generalx = l.Dense(32, activation='relu', kernel_regularizer=kr)(general)
+    s = 6
+    generalx = l.Dense(32 * s, activation='relu', kernel_regularizer=kr)(general)
     generalx = l.BatchNormalization()(generalx)
+    generalx = l.Dropout(0.5)(generalx)
 
-    piecex = l.Dense(512, activation='relu', kernel_regularizer=kr)(piece)
+    piecex = l.Dense(512 * s, activation='relu', kernel_regularizer=kr)(piece)
     piecex = l.BatchNormalization()(piecex)
+    piecex = l.Dropout(0.5)(piecex)
 
-    squarex = l.Dense(256, activation='relu', kernel_regularizer=kr)(square)
+    mobilityx = l.Dense(128 * s, activation='relu', kernel_regularizer=kr)(mobility)
+    mobilityx = l.BatchNormalization()(mobilityx)
+    mobilityx = l.Dropout(0.5)(mobilityx)
+
+    squarex = l.Dense(256 * s, activation='relu', kernel_regularizer=kr)(square)
     squarex = l.BatchNormalization()(squarex)
+    squarex = l.Dropout(0.5)(squarex)
 
-    combined = l.Concatenate()([generalx, piecex, squarex])
-    out = l.Dense(512, activation='relu', kernel_regularizer=kr)(combined)
+    combined = l.Concatenate()([generalx, piecex, mobilityx, squarex])
+    out = l.Dense(512 * s, activation='relu', kernel_regularizer=kr)(combined)
     out = l.BatchNormalization()(out)
     out = l.Dropout(0.5)(out)
     out = l.Dense(1, activation='linear')(out)
 
-    model = tf.keras.models.Model(inputs=[general, piece, square], outputs=out)
+    model = tf.keras.models.Model(inputs=[general, piece, mobility, square], outputs=out)
     return model
