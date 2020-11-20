@@ -1,3 +1,4 @@
+import sys
 from enum import Enum
 from collections import namedtuple
 import time
@@ -11,29 +12,41 @@ class EntryFlag(Enum):
 
 Entry = namedtuple('Entry', 'value depth flag move')
 
-def get_move_sort_score(board, move, color):
+def get_move_sort_score(board, move, color, best=None):
     score = 0
     if board.is_capture(move):
         score += 2000
     if board.gives_check(move):
         score += 3000
-    if board.is_attacked_by(not color, move.from_square):
-        score += 1000
-    if board.is_castling(move):
-        score += 500
+    #if board.is_attacked_by(not color, move.from_square):
+        #score += 1000
     return score
 
-def negamax(engine, depth, alpha, beta, color):
+def negamax(engine, depth, alpha, beta, color, root=False):
     alphaorig = alpha
     curr_depth = engine.depth - depth
     board = engine.board
     evaluator = engine.evaluator
     transition_table = engine.transition_table
+    moves = list(board.legal_moves)
+    skip_cache = False
+
+    if root:
+        tmp = []
+        for move in moves:
+            board.push(move)
+            if board.is_checkmate() or not board.is_game_over():
+                tmp.append(move)
+            board.pop()
+
+        if len(tmp) < len(moves) and len(tmp) > 0:
+            moves = tmp
+            skip_cache = True
     
     h = zobrist_hash(board)
     # ttEntry lookup
     ttEntry = transition_table.get(h)
-    if ttEntry and ttEntry.depth >= depth:
+    if not skip_cache and ttEntry and ttEntry.depth >= depth:
         if ttEntry.flag == EntryFlag.EXACT:
             return (ttEntry.value, ttEntry.move)
         elif ttEntry.flag == EntryFlag.LOWERBOUND:
@@ -48,8 +61,8 @@ def negamax(engine, depth, alpha, beta, color):
         return [quiesce(board, evaluator, alpha, beta, color), None]
 
     _max = [-99999, []]
-    moves = board.legal_moves
     moves = sorted(moves, key=lambda x: get_move_sort_score(board, x, color), reverse=True)
+
     for move in moves:
         board.push(move)
         score = -negamax(engine, depth - 1, -beta, -alpha, -color)[0]
@@ -72,7 +85,7 @@ def negamax(engine, depth, alpha, beta, color):
     transition_table[h] = ttEntry
     return _max
 
-def quiesce(board, evaluator, alpha, beta, color, depth=100):
+def quiesce(board, evaluator, alpha, beta, color, depth=10):
     standpat = color * evaluator(board)
     if depth == 0:
         return standpat

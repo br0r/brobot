@@ -15,11 +15,6 @@ def net_evaluator(board):
     if board.is_checkmate():
         return -mul * (9000 - len(board.move_stack))
 
-    if board.is_stalemate():
-        return 0
-    if board.is_insufficient_material():
-        return 0
-
     global gmodel
     if not gmodel:
         gmodel = tf.keras.models.load_model(WEIGHTS_PATH)
@@ -28,8 +23,8 @@ def net_evaluator(board):
         # return mul * cache[h]
         return cache[h]
 
-    gf, pf, sf = get_train_row(board)
-    score = gmodel([np.array([gf]), np.array([pf]), np.array([sf])])
+    gf, pf, mf, sf = get_train_row(board)
+    score = gmodel([np.array([gf]), np.array([pf]), np.array([mf]), np.array([sf])])
     score = float(score)
     #score = gmodel.predict([np.array([gf]), np.array([pf]), np.array([sf])])[0]
     #score = gmodel.predict([np.array([gf]), np.array([pf])])[0]

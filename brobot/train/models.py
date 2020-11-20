@@ -23,8 +23,8 @@ def get_model():
     square = l.Input(shape=(64*4), name='c')
     #kr = tf.keras.regularizers.l1(0.01)
     kr = None
-
-    s = 6
+    # best 1.47 s = 3, dropout all, quiet data
+    s = 2
     generalx = l.Dense(32 * s, activation='relu', kernel_regularizer=kr)(general)
     generalx = l.BatchNormalization()(generalx)
     generalx = l.Dropout(0.5)(generalx)

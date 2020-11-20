@@ -1,6 +1,7 @@
 import chess
 import chess.pgn
 from brobot.engine import search, evaluators
+import time
 import numpy as np
 
 class Engine:
@@ -15,16 +16,18 @@ class Engine:
         self.depth = depth
         self.timeleft = totaltime
         self.transition_table = {}
-        self.transition_table = {}
+        self.t = time.time()
 
     def set_timeleft(self, timeleft):
         self.timeleft = timeleft
+        self.t = time.time()
 
     def find_best_move(self):
         turn = self.board.turn
         color = 1 if turn else -1
-        (score, move) = search.negamax(self, self.depth, -9999, 9999, color)
-        return (score, move)
+        depth = self.depth
+        (score, move) = search.negamax(self, self.depth, -9999, 9999, color, root=True)
+        return (score, move, depth)
 
     def make_move(self, move):
         self.board.push(move)
@@ -33,5 +36,11 @@ class Engine:
         if not self.timeleft:
             return None
         num_moves = len(self.board.move_stack)
-        return max(1.0, self.timeleft / (max(10, 60.0 - num_moves)))
+        time_per_move = max(1.0, (self.timeleft) / (max(10, 60.0 - num_moves)))
+        return time_per_move
+
+    def calculate_timeleft(self):
+        time_per_move = self.calculate_timelimit()
+        dt = (time.time() - self.t)
+        return time_per_move - dt
 

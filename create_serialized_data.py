@@ -9,6 +9,6 @@ STOCKFISH_PATH = os.getenv('STOCKFISH_PATH', 'stockfish')
 engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
 
 #build_serialized_data(sys.argv[1], sys.argv[2], parse_tuner(get_train_row_old, engine=engine, depth=0), verbose=True)
-build_serialized_data(sys.argv[1], sys.argv[2], parse_tuner(get_train_row, engine=engine, depth=0), verbose=True)
-#build_serialized_data(sys.argv[1], sys.argv[2], parse_fen_row(get_train_row), verbose=True)
+#build_serialized_data(sys.argv[1], sys.argv[2], parse_tuner(get_train_row, engine=engine, depth=0), verbose=True)
+build_serialized_data(sys.argv[1], sys.argv[2], parse_fen_row(get_train_row), verbose=True)
 engine.close()

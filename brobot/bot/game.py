@@ -16,7 +16,7 @@ class Game(threading.Thread):
 
     def run(self):
         if self.current_state:
-            is_white = self.current_state['white']['id'] == self.bot_id
+            is_white = self.current_state['white'].get('id') == self.bot_id
             self.engine.color = chess.WHITE if is_white else chess.BLACK
             state = self.current_state['state']
             self.handle_state_change(state)
@@ -57,8 +57,8 @@ class Game(threading.Thread):
             move = random.choice(list(self.engine.board.legal_moves))
         else:
             t = time.time()
-            score, move = self.engine.find_best_move()
-            print('MAKE_MOVE', move, score, time.time() - t)
+            score, move, depth = self.engine.find_best_move()
+            print('MAKE_MOVE', move, score, depth, time.time() - t)
             #time.sleep(0.2)
         self.client.bots.make_move(self.game_id, move)
 

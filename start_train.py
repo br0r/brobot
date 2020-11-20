@@ -11,8 +11,8 @@ val_seq = None
 #model = get_old_model()
 mem = True
 multi = True
-train_seq = SerializedSequence('./test.file', 128, mem=mem, multi=multi)
-#val_seq = SerializedSequence('./val.file', 128, mem=mem, multi=multi)
+train_seq = SerializedSequence('./lichesstest.file', 128, mem=mem, multi=multi)
+val_seq = SerializedSequence('./val.new.d0.file', 128, mem=mem, multi=multi)
 model = get_model()
 run(train_seq, val_seq=val_seq, model=model)
 

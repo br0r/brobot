@@ -53,6 +53,9 @@ with open(pgn_file, 'r') as pgn:
             continue
 
         for move in game.mainline_moves():
+            if board.is_capture(move):
+                board.push(move)
+                continue
             board.push(move)
             rand_moves = 0
             num_rand_moves = max_rand_moves
@@ -71,6 +74,8 @@ with open(pgn_file, 'r') as pgn:
             else:
                 y = float(str(score))
 
+            if y and abs(y) > 2000:
+                y = None
 
             if y is not None:
                 fen = board.fen()
