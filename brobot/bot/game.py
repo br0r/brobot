@@ -1,8 +1,11 @@
+import os
 import threading
 import chess
 import datetime
 import time
 import random
+
+RANDOM=int(os.getenv('RANDOM', 0))
 
 class Game(threading.Thread):
     def __init__(self, client, game_id, engine, bot_id, **kwargs):
@@ -53,7 +56,7 @@ class Game(threading.Thread):
             self.engine.make_move(uci_move)
 
     def make_move(self):
-        if len(self.engine.board.move_stack) < 2:
+        if len(self.engine.board.move_stack) < RANDOM*2:
             move = random.choice(list(self.engine.board.legal_moves))
         else:
             t = time.time()

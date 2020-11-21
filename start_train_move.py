@@ -11,8 +11,8 @@ val_seq = None
 #model = get_old_model()
 mem = True
 multi = True
-train_seq = SerializedSequence('./movetest.file', 128, mem=mem, multi=multi)
-val_seq = SerializedSequence('./movetest.val.file', 128, mem=mem, multi=multi)
+train_seq = SerializedSequence('./move.train.quiet.file', 128, mem=mem, multi=multi)
+val_seq = SerializedSequence('./move.val.quiet.file', 128, mem=mem, multi=multi)
 model = get_move_model()
 run(train_seq, val_seq=val_seq, model=model, checkpoint_filepath='/tmp/checkpoint_move', loss='mse')
 

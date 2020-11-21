@@ -19,7 +19,7 @@ class Engine:
         self.timeleft = totaltime
         self.transition_table = {}
         self.t = time.time()
-        self.prob_threshold = PROB_THRESHOLD * 100
+        self.prob_threshold = PROB_THRESHOLD * 10
 
     def set_timeleft(self, timeleft):
         self.timeleft = timeleft
@@ -32,10 +32,10 @@ class Engine:
         nummoves = len(list(self.board.move_stack))
         if nummoves > 50:
             depth += 1
-            self.prob_threshold = PROB_THRESHOLD * 10
+            self.prob_threshold = PROB_THRESHOLD / 10
         if nummoves > 150:
             depth += 1
-            self.prob_threshold = PROB_THRESHOLD
+            self.prob_threshold = PROB_THRESHOLD / 100
             depth += math.floor((nummoves - 150) / 50)
 
         (score, move, node_depth) = search.negamax(self, depth, -9999, 9999, color, root=True, prob=1.0, curr_depth=0)
