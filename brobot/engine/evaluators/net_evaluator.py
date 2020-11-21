@@ -14,6 +14,7 @@ MOVE_MODEL_PATH = '/Users/bror/workspace/workshops/move-mk1.tflite'
 quant = WEIGHTS_PATH.endswith('.tflite')
 movequant = MOVE_MODEL_PATH.endswith('.tflite')
 cache = {}
+movecache = {}
 # negamax impl
 def net_evaluator(board):
     turn = board.turn
@@ -46,7 +47,11 @@ def net_evaluator(board):
     cache[h] = score
     return score
 
-def net_move_evaluator(pos_rep, move):
+def get_moves_pred(board, moves, h=None):
+    if not h:
+        h = zobrist_hash(board)
+    if h in movecache:
+        return movecache[h]
     global gmovemodel
     if not gmovemodel:
         if movequant:
@@ -54,17 +59,22 @@ def net_move_evaluator(pos_rep, move):
             gmovemodel.allocate_tensors()
         else:
             gmovemodel = tf.keras.models.load_model(MOVE_MODEL_PATH)
-
-    gf, pf, mf, sf = pos_rep
-    move_rep = get_move_rep(board, move)
+    ys_= []
+    gf, pf, mf, sf = get_pos_rep(board)
     if movequant:
         gmovemodel.set_tensor(0, [gf])
         gmovemodel.set_tensor(3, [pf])
         gmovemodel.set_tensor(1, [mf])
         gmovemodel.set_tensor(4, [sf])
-        gmovemodel.set_tensor(2, [move_rep])
-        gmovemodel.invoke()
-        y_ = gmovemodel.get_tensor(51)[0][0]
-    else:
-        y_ = gmovemodel([np.array([gf]), np.array([pf]), np.array([mf]), np.array([sf]), np.array([move_rep])])
-    return float(y_)
+
+    for move in moves:
+        move_rep = get_move_rep(board, move)
+        if movequant:
+            gmovemodel.set_tensor(2, [move_rep])
+            gmovemodel.invoke()
+            y_ = gmovemodel.get_tensor(51)[0][0]
+        else:
+            y_ = gmovemodel([np.array([gf]), np.array([pf]), np.array([mf]), np.array([sf]), np.array([move_rep])])
+        ys_.append((float(y_), move))
+    movecache[h] = ys_
+    return ys_

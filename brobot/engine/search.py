@@ -4,6 +4,8 @@ from collections import namedtuple
 import time
 import numpy as np
 from chess.polyglot import zobrist_hash
+from brobot.train.utils import get_pos_rep
+from brobot.engine.evaluators.net_evaluator import get_moves_pred
 
 class EntryFlag(Enum):
     EXACT = 1
@@ -22,16 +24,16 @@ def get_move_sort_score(board, move, color, best=None):
         score += 2000
     return score
 
-def negamax(engine, depth, alpha, beta, color, root=False):
+def negamax(engine, depth, alpha, beta, color, root=False, prob=1.0, curr_depth=0):
+    prob_threshold = engine.prob_threshold
     alphaorig = alpha
-    curr_depth = engine.depth - depth
     board = engine.board
     evaluator = engine.evaluator
     transition_table = engine.transition_table
     moves = list(board.legal_moves)
     skip_cache = False
 
-    if root:
+    if False and root:
         tmp = []
         for move in moves:
             board.push(move)
@@ -48,27 +50,35 @@ def negamax(engine, depth, alpha, beta, color, root=False):
     ttEntry = transition_table.get(h)
     if not skip_cache and ttEntry and ttEntry.depth >= depth:
         if ttEntry.flag == EntryFlag.EXACT:
-            return (ttEntry.value, ttEntry.move)
+            return (ttEntry.value, ttEntry.move, ttEntry.depth)
         elif ttEntry.flag == EntryFlag.LOWERBOUND:
             alpha = max(alpha, ttEntry.value)
         elif ttEntry.flag == EntryFlag.UPPERBOUND:
             beta = min(beta, ttEntry.value)
 
         if alpha >= beta:
-            return (ttEntry.value, ttEntry.move)
+            return (ttEntry.value, ttEntry.move, ttEntry.depth)
 
-    if depth == 0:
-        return [quiesce(board, evaluator, alpha, beta, color), None]
+    if prob < prob_threshold:
+        return [quiesce(board, evaluator, alpha, beta, color), None, curr_depth]
 
-    _max = [-99999, []]
-    moves = sorted(moves, key=lambda x: get_move_sort_score(board, x, color), reverse=True)
+    _max = [-99999, None, curr_depth]
+    if True and prob > (prob_threshold):
+        # Pred sort
+        moves = get_moves_pred(board, moves, h=h)
+        moves.sort(key=lambda x: x[0], reverse=True)
+    else:
+        moves = sorted(moves, key=lambda x: get_move_sort_score(board, x, color), reverse=True)
+        moves = [(1.0 / len(moves), x) for x in moves]
 
     for move in moves:
+        (cprob, move) = move
         board.push(move)
-        score = -negamax(engine, depth - 1, -beta, -alpha, -color)[0]
+        (score, _, node_depth) = negamax(engine, depth - 1, -beta, -alpha, -color, prob=prob*cprob, curr_depth=curr_depth+1)
+        score = -score
         board.pop()
         if score > _max[0]:
-            _max = [score, move]
+            _max = [score, move, node_depth]
         alpha = max(alpha, _max[0])
         if alpha >= beta:
             break

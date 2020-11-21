@@ -36,7 +36,7 @@ def start():
         elif event['type'] == 'gameStart':
             gameEvent = event['game']
             #engine = Engine(evaluators.simple_evaluator)
-            engine = Engine(evaluators.net_evaluator, depth=2)
+            engine = Engine(evaluators.net_evaluator, depth=3)
             game = Game(client, gameEvent['id'], engine, bot_id)
             games[gameEvent['id']] = game
             game.start()
