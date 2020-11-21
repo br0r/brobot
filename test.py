@@ -1,7 +1,7 @@
 import time
 import chess
 from brobot.engine import Engine, evaluators
-from brobot.train.utils import get_pieces, get_train_row
+from brobot.train.utils import get_pieces, get_pos_rep, get_move_rep
 
 fen = 'rn1qkbnr/p1pppppp/1p6/8/8/NQP5/PP1PbPPP/R1B1KBNR w KQkq - 0 4'
 fen = 'r1bqkbnr/ppppp1pp/5p2/8/2PnP1Q1/8/PP1P1PPP/RNB1KBNR w KQkq - 3 4'
@@ -24,6 +24,7 @@ fen = 'rnb1kbnr/ppp2ppp/4p3/3p4/3P4/q4N2/PPP1PPPP/R1BQKBR1 w Qkq - 0 5';
 # repeat error
 fen = 'r1b3kr/1p1p1pp1/pRnq1p1p/P1pN3Q/4P1B1/3P2P1/2P2P1P/1R4K1 b - - 17 34'
 
+
 engine = Engine(evaluators.net_evaluator, fen=fen, color=chess.WHITE, depth=1)
 #engine = Engine(evaluators.simple_evaluator, fen=fen, color=chess.WHITE, depth=2)
 engine.color = engine.board.turn
@@ -33,3 +34,4 @@ print(engine.board.turn)
 move = engine.find_best_move()
 print(time.time() - t, move)
 
+print(get_move_rep(engine.board, move[1]))

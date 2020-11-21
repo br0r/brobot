@@ -2,11 +2,17 @@ import tensorflow as tf
 import numpy as np
 import time
 from chess.polyglot import zobrist_hash
-from brobot.train.utils import get_train_row, get_train_row_old
+from brobot.train.utils import get_pos_rep, get_move_rep
 
 gmodel = None
+gmovemodel = None
 #WEIGHTS_PATH = '/tmp/checkpoint'
-WEIGHTS_PATH = '/Users/bror/workspace/workshops/checkpoint'
+#WEIGHTS_PATH = '/Users/bror/workspace/workshops/checkpoint'
+WEIGHTS_PATH = '/Users/bror/workspace/workshops/mk2-3.tflite'
+MOVE_MODEL_PATH = '/Users/bror/workspace/workshops/move-mk1.tflite'
+
+quant = WEIGHTS_PATH.endswith('.tflite')
+movequant = MOVE_MODEL_PATH.endswith('.tflite')
 cache = {}
 # negamax impl
 def net_evaluator(board):
@@ -17,23 +23,48 @@ def net_evaluator(board):
 
     global gmodel
     if not gmodel:
-        gmodel = tf.keras.models.load_model(WEIGHTS_PATH)
+        if quant:
+            gmodel = tf.lite.Interpreter(model_path=WEIGHTS_PATH)
+            gmodel.allocate_tensors()
+        else:
+            gmodel = tf.keras.models.load_model(WEIGHTS_PATH)
     h = zobrist_hash(board)
     if h in cache:
-        # return mul * cache[h]
         return cache[h]
 
-    gf, pf, mf, sf = get_train_row(board)
-    score = gmodel([np.array([gf]), np.array([pf]), np.array([mf]), np.array([sf])])
+    gf, pf, mf, sf = get_pos_rep(board)
+    if quant:
+        gmodel.set_tensor(0, [gf])
+        gmodel.set_tensor(1, [pf])
+        gmodel.set_tensor(3, [mf])
+        gmodel.set_tensor(2, [sf])
+        gmodel.invoke()
+        score = gmodel.get_tensor(42)[0][0]
+    else:
+        score = gmodel([np.array([gf]), np.array([pf]), np.array([mf]), np.array([sf])])
     score = float(score)
-    #score = gmodel.predict([np.array([gf]), np.array([pf]), np.array([sf])])[0]
-    #score = gmodel.predict([np.array([gf]), np.array([pf])])[0]
-
-    #x = get_train_row_old(board)
-    #score = gmodel.predict(np.array([x]))[0]
-
-    #gf, pf = get_train_row(board)
-    #score = gmodel.predict(np.array([pf]))[0]
     cache[h] = score
-    #return mul * score
     return score
+
+def net_move_evaluator(pos_rep, move):
+    global gmovemodel
+    if not gmovemodel:
+        if movequant:
+            gmovemodel = tf.lite.Interpreter(model_path=MOVE_MODEL_PATH)
+            gmovemodel.allocate_tensors()
+        else:
+            gmovemodel = tf.keras.models.load_model(MOVE_MODEL_PATH)
+
+    gf, pf, mf, sf = pos_rep
+    move_rep = get_move_rep(board, move)
+    if movequant:
+        gmovemodel.set_tensor(0, [gf])
+        gmovemodel.set_tensor(3, [pf])
+        gmovemodel.set_tensor(1, [mf])
+        gmovemodel.set_tensor(4, [sf])
+        gmovemodel.set_tensor(2, [move_rep])
+        gmovemodel.invoke()
+        y_ = gmovemodel.get_tensor(51)[0][0]
+    else:
+        y_ = gmovemodel([np.array([gf]), np.array([pf]), np.array([mf]), np.array([sf]), np.array([move_rep])])
+    return float(y_)

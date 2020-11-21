@@ -2,17 +2,38 @@ import sys
 from functools import partial
 import csv
 import numpy as np
+import random
 import tensorflow as tf
 import chess
 import chess.engine
-from brobot.train.utils import get_train_row
 
 def parse_fen_row(parsef):
     def parser(row):
-        (fen, score) = row
+        (fen, score, move) = row
         board = chess.Board(fen=fen)
         x = parsef(board)
-        return x, float(score)
+
+        return [(x, float(score))]
+    return parser
+
+def parse_fen_row_move(parsef, movef):
+    def parser(row):
+        (fen, score, ymove) = row
+        board = chess.Board(fen=fen)
+        posx = parsef(board)
+        arr = []
+        moves = []
+        for move in board.legal_moves:
+            if ymove != move.uci():
+                moves.append(move.uci())
+        
+        if not moves:
+            return None
+        mx = movef(board, chess.Move.from_uci(ymove))
+        arr.append(((*posx, mx), 1))
+        mx = movef(board, chess.Move.from_uci(random.choice(moves)))
+        arr.append(((*posx, mx), 0))
+        return arr
     return parser
 
 def parse_tuner(parsef, engine, depth=4):
@@ -30,7 +51,39 @@ def parse_tuner(parsef, engine, depth=4):
             return None
 
         x = parsef(board)
-        return x, y
+        return [(x, y)]
+    return parser
+
+def parse_tuner_move(parsef, parsemove, engine, depth=4):
+    def parser(row):
+        (fen,) = row
+        board = chess.Board(fen=fen)
+        ev = engine.analyse(board, chess.engine.Limit(depth=depth))
+        if not 'pv' in ev:
+            return None
+        score = ev['score'].white()
+        pv = ev['pv'][0].uci()
+        if isinstance(score, chess.engine.Mate) or isinstance(score, chess.engine.MateGivenType):
+            y = None # Ignore mates
+        else:
+            y = float(str(score))
+
+        if not y:
+            return None
+
+        arr = []
+        posx = parsef(board)
+        moves = []
+        for move in board.legal_moves:
+            if pv != move.uci():
+                moves.append(move.uci())
+        if not moves:
+            return None
+        mx = parsemove(board, chess.Move.from_uci(pv))
+        arr.append(((*posx, mx), 1))
+        mx = parsemove(board, chess.Move.from_uci(random.choice(moves)))
+        arr.append(((*posx, mx), 0))
+        return arr
     return parser
 
 def build_serialized_data(csv_file, to, parsef, verbose=False):
@@ -48,14 +101,15 @@ def build_serialized_data(csv_file, to, parsef, verbose=False):
                 if not arr:
                     continue
                 #np.savetxt(writef, arr, fmt='%d')
-                np.save(writef, arr)
+                for x in arr:
+                    np.save(writef, x)
                 i += 1
                 if i % 100 == 0 and verbose:
                     sys.stdout.write('\r%d' % i)
                     sys.stdout.flush()
 
 class SerializedSequence(tf.keras.utils.Sequence):
-    def __init__(self, sequence_file_path, batch_size, mem=False, multi=False):
+    def __init__(self, sequence_file_path, batch_size=128, mem=False, multi=False):
         self.batch_size = batch_size
         self.sequence_file_path = sequence_file_path
         i = 0

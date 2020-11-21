@@ -81,34 +81,47 @@ def get_mobility(board, pieces, num):
         ])
     return x
 
-pieces = ['p','n','b','r','q','k','P','N','B','R','Q','K']
-piecesm = {}
-for i in range(len(pieces)):
-    piecesm[pieces[i]] = i
+def get_move_rep(board, move):
+    from_square = move.from_square
+    to_square = move.to_square
+    is_capture = board.is_capture(move)
+    capture_piece = None
+    if board.is_en_passant(move):
+        capture_piece = 0
+    else:
+        capture_piece = board.piece_at(to_square).piece_type - 1 if is_capture else 10
+    capture_piece_type = tf.keras.backend.one_hot(capture_piece, 6).numpy()
+    piece_type = tf.keras.backend.one_hot(board.piece_at(from_square).piece_type - 1, 6).numpy()
+    from_pos = [
+        (chess.square_file(from_square) - 3.5) / 3.5,
+        (chess.square_rank(from_square) - 3.5) / 3.5,
+    ]
+    to_pos = [
+        (chess.square_file(to_square) - 3.5) / 3.5,
+        (chess.square_rank(to_square) - 3.5) / 3.5,
+    ]
+    rank = 0
 
-def get_train_row_old(board):
-    piece_map = board.piece_map()
-    rep = np.zeros((8 * 8, 12))
+    num_attackers = len(board.attackers(not board.turn, from_square))
+    num_defenders = len(board.attackers(not board.turn, to_square))
+    num_attackers2 = len(board.attackers(board.turn, from_square))
+    num_defenders2 = len(board.attackers(board.turn, to_square))
+    rep = [
+        float(is_capture),
+        *capture_piece_type,
+        num_attackers,
+        num_defenders,
+        num_attackers2,
+        num_defenders2,
+        *piece_type,
+        *from_pos,
+        *to_pos,
+        *tf.keras.backend.one_hot(move.promotion - 1 if move.promotion else 10, 6).numpy(), # x > num_c gives empty vector
+        #rank,
+    ]
+    return np.array(rep).astype('float32')
 
-    for key in piece_map:
-        val = str(piece_map[key])
-        ind = piecesm[val]
-        label = None
-        if ind <= 5 and not board.turn: #black piece, black to move
-            label = 1
-        if ind <= 5 and board.turn: #black piece, white to move
-            label = -1
-        if ind > 5 and board.turn: #white piece, white to move
-            label = 1
-        if ind > 5 and not board.turn: #white piece, black to move
-            label = -1
-
-        rep[key][ind] = label
-
-    rep = rep.flatten()
-    return rep
-
-def get_train_row(board):
+def get_pos_rep(board):
     castling = [
         int(board.has_kingside_castling_rights(chess.WHITE)),
         int(board.has_queenside_castling_rights(chess.WHITE)),

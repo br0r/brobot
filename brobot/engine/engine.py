@@ -26,7 +26,13 @@ class Engine:
         turn = self.board.turn
         color = 1 if turn else -1
         depth = self.depth
-        (score, move) = search.negamax(self, self.depth, -9999, 9999, color, root=True)
+        nummoves = len(list(self.board.move_stack))
+        if nummoves > 50:
+            depth += 1
+        if nummoves > 150:
+            depth += 1
+
+        (score, move) = search.negamax(self, depth, -9999, 9999, color, root=True)
         return (score, move, depth)
 
     def make_move(self, move):

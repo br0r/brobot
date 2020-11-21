@@ -15,11 +15,11 @@ Entry = namedtuple('Entry', 'value depth flag move')
 def get_move_sort_score(board, move, color, best=None):
     score = 0
     if board.is_capture(move):
-        score += 2000
+        score += 5000
     if board.gives_check(move):
-        score += 3000
-    #if board.is_attacked_by(not color, move.from_square):
-        #score += 1000
+        score += 1000
+    if board.is_attacked_by(not color, move.from_square):
+        score += 2000
     return score
 
 def negamax(engine, depth, alpha, beta, color, root=False):
