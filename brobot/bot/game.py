@@ -24,13 +24,16 @@ class Game(threading.Thread):
             state = self.current_state['state']
             self.handle_state_change(state)
                 
-        for event in self.stream:
-            if 'winner' in event:
-                break
-            if event['type'] == 'gameState':
-                self.handle_state_change(event)
-            elif event['type'] == 'chatLine':
-                self.handle_chat_line(event)
+        try:
+            for event in self.stream:
+                if 'winner' in event:
+                    break
+                if event['type'] == 'gameState':
+                    self.handle_state_change(event)
+                elif event['type'] == 'chatLine':
+                    self.handle_chat_line(event)
+        except:
+            os._exit(1)
 
     def handle_state_change(self, state):
         timeleft = state['wtime'] if self.engine.color == chess.WHITE else state['btime']
@@ -62,6 +65,9 @@ class Game(threading.Thread):
             t = time.time()
             score, move, depth = self.engine.find_best_move()
             print('MAKE_MOVE', move, score, depth, time.time() - t)
+            if score < -5000:
+                self.client.bots.resign_game(self.game_id)
+                return
             #time.sleep(0.2)
         self.client.bots.make_move(self.game_id, move)
 

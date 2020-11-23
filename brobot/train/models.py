@@ -71,6 +71,10 @@ def get_model():
     out = l.Dense(512 * s, activation='relu', kernel_regularizer=kr)(combined)
     out = l.BatchNormalization()(out)
     out = l.Dropout(0.5)(out)
+    out = l.Dense(256 * s, activation='relu', kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
+    out = l.Dense(128 * s, activation='relu', kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
     out = l.Dense(1, activation='linear')(out)
 
     model = tf.keras.models.Model(inputs=[general, piece, mobility, square], outputs=out)

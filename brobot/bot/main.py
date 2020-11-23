@@ -52,8 +52,15 @@ def start():
             if TRIGGER_REMATCH:
                 game = client.games.export(game_id)
                 players = game['players']
-                white = players['white']['user']
-                black = players['black']['user']
-                opponent = white if white['id'] != bot_id else black
-                time.sleep(1)
-                client.challenges.create(opponent['id'], False, clock_limit=60*3, clock_increment=2)
+                print(players)
+                white = players['white']['user'] if 'user' in players['white'] else None
+                black = players['black']['user'] if 'user' in players['black'] else None
+                if not white or not black:
+                    # ai
+                    ailevel = players['white']['aiLevel'] if white is None else players['black']['aiLevel']
+                    time.sleep(1)
+                    client.challenges.create_ai(ailevel, clock_limit=60*30, clock_increment=30)
+                else:
+                    opponent = white if white['id'] != bot_id else black
+                    time.sleep(1)
+                    client.challenges.create(opponent['id'], False, clock_limit=60*5, clock_increment=5)

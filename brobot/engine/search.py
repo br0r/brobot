@@ -24,6 +24,25 @@ def get_move_sort_score(board, move, color, best=None):
         score += 2000
     return score
 
+def MTDF(engine, depth, color, f=0):
+    g = f
+    upper_bound = 999999
+    lower_bound = -999999
+    b = None
+
+    while lower_bound < upper_bound:
+        if g == lower_bound:
+            beta = g + 1
+        else:
+            beta = g
+        b = negamax(engine, depth, beta - 1, beta, color, root=True)
+        g = b[0]
+        if g < beta:
+            upper_bound = g
+        else:
+            lower_bound = g
+    return b
+
 def negamax(engine, depth, alpha, beta, color, root=False, prob=1.0, curr_depth=0):
     prob_threshold = engine.prob_threshold
     alphaorig = alpha
@@ -33,7 +52,7 @@ def negamax(engine, depth, alpha, beta, color, root=False, prob=1.0, curr_depth=
     moves = list(board.legal_moves)
     skip_cache = False
 
-    if False and root:
+    if root:
         tmp = []
         for move in moves:
             board.push(move)
@@ -59,11 +78,13 @@ def negamax(engine, depth, alpha, beta, color, root=False, prob=1.0, curr_depth=
         if alpha >= beta:
             return (ttEntry.value, ttEntry.move, ttEntry.depth)
 
-    if prob < prob_threshold:
+    #if prob < prob_threshold:
+    if depth == 0 or board.is_checkmate() or len(moves) == 0:
         return [quiesce(board, evaluator, alpha, beta, color), None, curr_depth]
 
     _max = [-99999, None, curr_depth]
-    if True and prob > (prob_threshold):
+    #if True and prob > (prob_threshold):
+    if depth > 1:
         # Pred sort
         moves = get_moves_pred(board, moves, h=h)
         moves.sort(key=lambda x: x[0], reverse=True)
@@ -74,7 +95,7 @@ def negamax(engine, depth, alpha, beta, color, root=False, prob=1.0, curr_depth=
     for move in moves:
         (cprob, move) = move
         board.push(move)
-        (score, _, node_depth) = negamax(engine, depth - 1, -beta, -alpha, -color, prob=prob*cprob, curr_depth=curr_depth+1)
+        (score, ch, node_depth) = negamax(engine, depth - 1, -beta, -alpha, -color, prob=prob*cprob, curr_depth=curr_depth+1)
         score = -score
         board.pop()
         if score > _max[0]:

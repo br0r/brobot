@@ -9,7 +9,7 @@ gmovemodel = None
 #WEIGHTS_PATH = '/tmp/checkpoint'
 #WEIGHTS_PATH = '/Users/bror/workspace/workshops/checkpoint'
 WEIGHTS_PATH = '/Users/bror/workspace/workshops/mk2-3.tflite'
-MOVE_MODEL_PATH = '/Users/bror/workspace/workshops/move-mk1.tflite'
+MOVE_MODEL_PATH = '/Users/bror/workspace/workshops/move-mk1-3.tflite'
 
 quant = WEIGHTS_PATH.endswith('.tflite')
 movequant = MOVE_MODEL_PATH.endswith('.tflite')
@@ -21,6 +21,8 @@ def net_evaluator(board):
     mul = 1 if turn else -1
     if board.is_checkmate():
         return -mul * (9000 - len(board.move_stack))
+    if board.is_stalemate():
+        return 0
 
     global gmodel
     if not gmodel:

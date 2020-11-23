@@ -19,7 +19,8 @@ class Engine:
         self.timeleft = totaltime
         self.transition_table = {}
         self.t = time.time()
-        self.prob_threshold = PROB_THRESHOLD * 10
+        self.prob_threshold = PROB_THRESHOLD * 100
+        self.latesttimes = []
 
     def set_timeleft(self, timeleft):
         self.timeleft = timeleft
@@ -30,15 +31,26 @@ class Engine:
         color = 1 if turn else -1
         depth = self.depth
         nummoves = len(list(self.board.move_stack))
-        if nummoves > 50:
+        if nummoves > 100:
             depth += 1
             self.prob_threshold = PROB_THRESHOLD / 10
-        if nummoves > 150:
+        if nummoves > 200:
             depth += 1
             self.prob_threshold = PROB_THRESHOLD / 100
             depth += math.floor((nummoves - 150) / 50)
 
-        (score, move, node_depth) = search.negamax(self, depth, -9999, 9999, color, root=True, prob=1.0, curr_depth=0)
+        if len(self.latesttimes) == 3 and np.mean(self.latesttimes) < 2:
+            depth += 1
+
+        t = time.time()
+        #(score, move, node_depth) = search.negamax(self, depth, -999999, 999999, color, root=True, prob=1.0, curr_depth=0)
+        (score, move, node_depth) = search.MTDF(self, depth, color)
+
+        dt = time.time() - t
+        self.latesttimes.append(dt)
+        if len(self.latesttimes) > 3:
+            self.latesttimes.pop(0)
+        #(score, move, node_depth) = search.iterative_deepening(self, depth, color)
         return (score, move, node_depth)
 
     def make_move(self, move):

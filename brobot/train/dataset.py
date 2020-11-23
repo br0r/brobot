@@ -6,11 +6,20 @@ import random
 import tensorflow as tf
 import chess
 import chess.engine
+from bin_data import NNUEBinData 
 
 def parse_fen_row(parsef):
     def parser(row):
         (fen, score, move) = row
         board = chess.Board(fen=fen)
+        x = parsef(board)
+
+        return [(x, float(score))]
+    return parser
+
+def parse_fen_row_bin(parsef):
+    def parser(row):
+        (board, score, move) = row
         x = parsef(board)
 
         return [(x, float(score))]
@@ -108,8 +117,27 @@ def build_serialized_data(csv_file, to, parsef, verbose=False):
                     sys.stdout.write('\r%d' % i)
                     sys.stdout.flush()
 
+def build_serialized_data_from_bin(bindatapath, to, parsef, verbose=False):
+    if not bindatapath or not to:
+        raise 'Invalid arguments'
+    bindata = NNUEBinData(bindatapath)
+    with open(to, 'ab') as writef:
+        i = 0
+        for row in bindata:
+            (board, move, outcome, score) = row
+            arr = parsef((board, score, move))
+            if not arr:
+                continue
+            for x in arr:
+                np.save(writef, x)
+            i += 1
+            if i % 100 == 0 and verbose:
+                sys.stdout.write('\r%d' % i)
+                sys.stdout.flush()
+
+
 class SerializedSequence(tf.keras.utils.Sequence):
-    def __init__(self, sequence_file_path, batch_size=128, mem=False, multi=False):
+    def __init__(self, sequence_file_path, batch_size=128, mem=False, multi=False, max_n=None):
         self.batch_size = batch_size
         self.sequence_file_path = sequence_file_path
         i = 0
@@ -128,6 +156,8 @@ class SerializedSequence(tf.keras.utils.Sequence):
                 if self.mem:
                     self.data.append(arr)
                 i += 1
+                if max_n and i >= max_n:
+                    break
             except:
                 break
 
