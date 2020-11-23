@@ -18,15 +18,17 @@ if quant:
     # Get input and output tensors.
     input_details = interpreter.get_input_details()
     output_details = interpreter.get_output_details()
+    print(output_details)
     errors = []
     t = time.time()
     for row in s.data:
         x, y = row
+        general, piece, mobility, square = x
         # Test the model on random input data.
-        interpreter.set_tensor(input_details[0]['index'], [x[0]])
-        interpreter.set_tensor(input_details[1]['index'], [x[1]])
-        interpreter.set_tensor(input_details[2]['index'], [x[3]])
-        interpreter.set_tensor(input_details[3]['index'], [x[2]])
+        interpreter.set_tensor(0, [general])
+        interpreter.set_tensor(1, [mobility])
+        interpreter.set_tensor(2, [piece])
+        interpreter.set_tensor(3, [square])
 
         interpreter.invoke()
 

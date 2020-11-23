@@ -117,7 +117,7 @@ def build_serialized_data(csv_file, to, parsef, verbose=False):
                     sys.stdout.write('\r%d' % i)
                     sys.stdout.flush()
 
-def build_serialized_data_from_bin(bindatapath, to, parsef, verbose=False):
+def build_serialized_data_from_bin(bindatapath, to, parsef, verbose=False, limit=None):
     if not bindatapath or not to:
         raise 'Invalid arguments'
     bindata = NNUEBinData(bindatapath)
@@ -134,6 +134,8 @@ def build_serialized_data_from_bin(bindatapath, to, parsef, verbose=False):
             if i % 100 == 0 and verbose:
                 sys.stdout.write('\r%d' % i)
                 sys.stdout.flush()
+            if limit is not None and i >= limit:
+                break
 
 
 class SerializedSequence(tf.keras.utils.Sequence):

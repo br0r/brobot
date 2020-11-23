@@ -43,8 +43,8 @@ class Engine:
             depth += 1
 
         t = time.time()
-        #(score, move, node_depth) = search.negamax(self, depth, -999999, 999999, color, root=True, prob=1.0, curr_depth=0)
-        (score, move, node_depth) = search.MTDF(self, depth, color)
+        (score, move, node_depth) = search.negamax(self, depth, -999999, 999999, color, root=True, prob=1.0, curr_depth=0)
+        #(score, move, node_depth) = search.MTDF(self, depth, color)
 
         dt = time.time() - t
         self.latesttimes.append(dt)

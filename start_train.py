@@ -10,8 +10,8 @@ val_seq = None
 #model = tf.keras.models.load_model(WEIGHTS_PATH)
 mem = True
 multi = True
-train_seq = SerializedSequence('./lichesstest.file', 128, mem=mem, multi=multi)
-val_seq = SerializedSequence('./val.new.d0.file', 128, mem=mem, multi=multi)
+train_seq = SerializedSequence('./bindatatest.file', 128, mem=mem, multi=multi)
+val_seq = SerializedSequence('./val.quiet.d0.file', 128, mem=mem, multi=multi)
 model = get_model()
 run(train_seq, val_seq=val_seq, model=model)
 

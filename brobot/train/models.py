@@ -10,31 +10,40 @@ def get_move_model():
     #kr = tf.keras.regularizers.l1(0.01)
     kr = None
     # best 1.47 s = 3, dropout all, quiet data
+    activation='relu'
     s = 2
-    generalx = l.Dense(32 * s, activation='relu', kernel_regularizer=kr)(general)
+    generalx = l.Dense(32 * s, activation=activation, kernel_regularizer=kr)(general)
     generalx = l.BatchNormalization()(generalx)
     generalx = l.Dropout(0.5)(generalx)
 
-    piecex = l.Dense(512 * s, activation='relu', kernel_regularizer=kr)(piece)
+    piecex = l.Dense(512 * s, activation=activation, kernel_regularizer=kr)(piece)
     piecex = l.BatchNormalization()(piecex)
     piecex = l.Dropout(0.5)(piecex)
 
-    mobilityx = l.Dense(128 * s, activation='relu', kernel_regularizer=kr)(mobility)
+    mobilityx = l.Dense(64 * s, activation=activation, kernel_regularizer=kr)(mobility)
     mobilityx = l.BatchNormalization()(mobilityx)
     mobilityx = l.Dropout(0.5)(mobilityx)
 
-    squarex = l.Dense(256 * s, activation='relu', kernel_regularizer=kr)(square)
+    squarex = l.Dense(128 * s, activation=activation, kernel_regularizer=kr)(square)
     squarex = l.BatchNormalization()(squarex)
     squarex = l.Dropout(0.5)(squarex)
 
-    movex = l.Dense(64 * s, activation='relu', kernel_regularizer=kr)(move)
+    movex = l.Dense(128 * s, activation=activation, kernel_regularizer=kr)(move)
     movex = l.BatchNormalization()(movex)
     movex = l.Dropout(0.5)(movex)
 
     combined = l.Concatenate()([generalx, piecex, mobilityx, squarex, movex])
-    out = l.Dense(512 * s, activation='relu', kernel_regularizer=kr)(combined)
+    out = l.Dense(512 * s, activation=activation, kernel_regularizer=kr)(combined)
     out = l.BatchNormalization()(out)
     out = l.Dropout(0.5)(out)
+    out = l.Dense(256 * s, activation=activation, kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
+    out = l.Dense(128 * s, activation=activation, kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
+    out = l.Dense(64 * s, activation=activation, kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
+    out = l.Dense(32 * s, activation=activation, kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
     out = l.Dense(1, activation='sigmoid')(out)
 
     model = tf.keras.models.Model(inputs=[general, piece, mobility, square, move], outputs=out)
@@ -51,29 +60,34 @@ def get_model():
     kr = None
     # best 1.47 s = 3, dropout all, quiet data
     s = 2
-    generalx = l.Dense(32 * s, activation='relu', kernel_regularizer=kr)(general)
+    activation='relu'
+    generalx = l.Dense(32 * s, activation=activation, kernel_regularizer=kr)(general)
     generalx = l.BatchNormalization()(generalx)
     generalx = l.Dropout(0.5)(generalx)
 
-    piecex = l.Dense(512 * s, activation='relu', kernel_regularizer=kr)(piece)
+    piecex = l.Dense(512 * s, activation=activation, kernel_regularizer=kr)(piece)
     piecex = l.BatchNormalization()(piecex)
     piecex = l.Dropout(0.5)(piecex)
 
-    mobilityx = l.Dense(128 * s, activation='relu', kernel_regularizer=kr)(mobility)
+    mobilityx = l.Dense(64 * s, activation=activation, kernel_regularizer=kr)(mobility)
     mobilityx = l.BatchNormalization()(mobilityx)
     mobilityx = l.Dropout(0.5)(mobilityx)
 
-    squarex = l.Dense(256 * s, activation='relu', kernel_regularizer=kr)(square)
+    squarex = l.Dense(128 * s, activation=activation, kernel_regularizer=kr)(square)
     squarex = l.BatchNormalization()(squarex)
     squarex = l.Dropout(0.5)(squarex)
 
     combined = l.Concatenate()([generalx, piecex, mobilityx, squarex])
-    out = l.Dense(512 * s, activation='relu', kernel_regularizer=kr)(combined)
+    out = l.Dense(512 * s, activation=activation, kernel_regularizer=kr)(combined)
     out = l.BatchNormalization()(out)
     out = l.Dropout(0.5)(out)
-    out = l.Dense(256 * s, activation='relu', kernel_regularizer=kr)(out)
+    out = l.Dense(256 * s, activation=activation, kernel_regularizer=kr)(out)
     out = l.BatchNormalization()(out)
-    out = l.Dense(128 * s, activation='relu', kernel_regularizer=kr)(out)
+    out = l.Dense(128 * s, activation=activation, kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
+    out = l.Dense(64 * s, activation=activation, kernel_regularizer=kr)(out)
+    out = l.BatchNormalization()(out)
+    out = l.Dense(32 * s, activation=activation, kernel_regularizer=kr)(out)
     out = l.BatchNormalization()(out)
     out = l.Dense(1, activation='linear')(out)
 

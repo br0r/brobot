@@ -70,8 +70,8 @@ with open(data_path, 'r') as f:
             except:
                 continue
 
-        #if board.is_capture(chess.Move.from_uci(ymove)):
-            #continue
+        if board.is_capture(chess.Move.from_uci(ymove)):
+            continue
         pos_rep = get_pos_rep(board)
         ys_ = []
         t = time.time()

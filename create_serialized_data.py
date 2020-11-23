@@ -12,6 +12,6 @@ engine = chess.engine.SimpleEngine.popen_uci(STOCKFISH_PATH)
 #build_serialized_data(sys.argv[1], sys.argv[2], parse_fen_row(get_pos_rep), verbose=True)
 #build_serialized_data(sys.argv[1], sys.argv[2], parse_fen_row_move(get_pos_rep, get_move_rep), verbose=True)
 #build_serialized_data(sys.argv[1], sys.argv[2], parse_tuner_move(get_pos_rep, get_move_rep, engine=engine, depth=0), verbose=True)
-build_serialized_data_from_bin(sys.argv[1], sys.argv[2], parse_fen_row_bin(get_pos_rep), verbose=True)
+build_serialized_data_from_bin(sys.argv[1], sys.argv[2], parse_fen_row_bin(get_pos_rep), verbose=True, limit=1e6)
 
 engine.close()

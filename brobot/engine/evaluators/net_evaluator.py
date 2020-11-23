@@ -8,8 +8,8 @@ gmodel = None
 gmovemodel = None
 #WEIGHTS_PATH = '/tmp/checkpoint'
 #WEIGHTS_PATH = '/Users/bror/workspace/workshops/checkpoint'
-WEIGHTS_PATH = '/Users/bror/workspace/workshops/mk2-3.tflite'
-MOVE_MODEL_PATH = '/Users/bror/workspace/workshops/move-mk1-3.tflite'
+WEIGHTS_PATH = '/Users/bror/workspace/workshops/chess-brobot-models/mk3.tflite'
+MOVE_MODEL_PATH = '/Users/bror/workspace/workshops/chess-brobot-models/move-mk1-3.tflite'
 
 quant = WEIGHTS_PATH.endswith('.tflite')
 movequant = MOVE_MODEL_PATH.endswith('.tflite')
@@ -38,11 +38,11 @@ def net_evaluator(board):
     gf, pf, mf, sf = get_pos_rep(board)
     if quant:
         gmodel.set_tensor(0, [gf])
-        gmodel.set_tensor(1, [pf])
-        gmodel.set_tensor(3, [mf])
-        gmodel.set_tensor(2, [sf])
+        gmodel.set_tensor(2, [pf])
+        gmodel.set_tensor(1, [mf])
+        gmodel.set_tensor(3, [sf])
         gmodel.invoke()
-        score = gmodel.get_tensor(42)[0][0]
+        score = gmodel.get_tensor(70)[0][0]
     else:
         score = gmodel([np.array([gf]), np.array([pf]), np.array([mf]), np.array([sf])])
     score = float(score)
